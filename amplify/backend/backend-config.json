@@ -1,0 +1,141 @@
+{
+  "storage": {
+    "dynamo9774b6d2": {
+      "service": "DynamoDB",
+      "providerPlugin": "awscloudformation"
+    }
+  },
+  "auth": {
+    "cognitoa0d056da": {
+      "service": "Cognito",
+      "serviceType": "managed",
+      "providerPlugin": "awscloudformation",
+      "frontendAuthConfig": {
+        "loginMechanisms": [
+          "PREFERRED_USERNAME"
+        ],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      }
+    }
+  },
+  "api": {
+    "containera5cb4df6": {
+      "resourceName": "containera5cb4df6",
+      "dependsOn": [
+        {
+          "category": "storage",
+          "resourceName": "dynamo9774b6d2",
+          "attributes": [
+            "Name",
+            "Arn",
+            "StreamArn"
+          ]
+        },
+        {
+          "category": "",
+          "resourceName": "NetworkStack",
+          "attributes": [
+            "ClusterName",
+            "VpcId",
+            "VpcCidrBlock",
+            "SubnetIds",
+            "VpcLinkId",
+            "CloudMapNamespaceId"
+          ]
+        },
+        {
+          "category": "auth",
+          "resourceName": "cognitoa0d056da",
+          "attributes": [
+            "UserPoolId",
+            "AppClientIDWeb"
+          ]
+        }
+      ],
+      "deploymentMechanism": "FULLY_MANAGED",
+      "imageSource": {
+        "type": "TEMPLATE",
+        "template": "dockerfile-rest-express"
+      },
+      "restrictAccess": true,
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "ElasticContainer",
+      "authName": "cognitoa0d056da",
+      "environmentMap": {
+        "STORAGE_DYNAMO9774B6D2_NAME": {
+          "Ref": "storagedynamo9774b6d2Name"
+        },
+        "STORAGE_DYNAMO9774B6D2_ARN": {
+          "Ref": "storagedynamo9774b6d2Arn"
+        },
+        "STORAGE_DYNAMO9774B6D2_STREAMARN": {
+          "Ref": "storagedynamo9774b6d2StreamArn"
+        }
+      },
+      "categoryPolicies": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:Put*",
+            "dynamodb:Create*",
+            "dynamodb:BatchWriteItem",
+            "dynamodb:Get*",
+            "dynamodb:BatchGetItem",
+            "dynamodb:List*",
+            "dynamodb:Describe*",
+            "dynamodb:Scan",
+            "dynamodb:Query",
+            "dynamodb:Update*",
+            "dynamodb:RestoreTable*",
+            "dynamodb:Delete*"
+          ],
+          "Resource": [
+            {
+              "Ref": "storagedynamo9774b6d2Arn"
+            },
+            {
+              "Fn::Join": [
+                "/",
+                [
+                  {
+                    "Ref": "storagedynamo9774b6d2Arn"
+                  },
+                  "index/*"
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "mutableParametersState": {
+        "permissions": {
+          "storage": {
+            "dynamo9774b6d2": [
+              "create",
+              "read",
+              "update",
+              "delete"
+            ]
+          }
+        }
+      },
+      "skipHashing": false,
+      "apiType": "REST",
+      "iamAccessUnavailable": true
+    }
+  }
+}
